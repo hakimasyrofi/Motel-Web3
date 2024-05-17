@@ -44,7 +44,7 @@ const port = 5000;
 
 async function main() {
   await mongoose.connect(
-    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.in81gjk.mongodb.net/motel-develpoment-db`
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOSTNAME}/motel-develpoment-db`
   );
   try {
     app.listen(port, () => {
