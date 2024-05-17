@@ -1,19 +1,21 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import axios from "axios";
+import { ethers } from "ethers";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { API } from "../../../backend";
 import { PulseLoader } from "react-spinners";
-// import google from "../../assets/basicIcon/google.svg";
 import facebook from "../../../assets/basicIcon/facebook.svg";
+import metamask from "../../../assets/basicIcon/metamask.svg";
 
 const WelcomePopup = ({
   setDefaultPopup,
   setShowLoginPopup,
   setShowCreateUserPopup,
   setLoginEmail,
+  setWalletSignature,
 }) => {
   const [inputFocused, setInputFocused] = useState(false);
   const { handleSubmit, register, reset } = useForm();
@@ -108,6 +110,48 @@ const WelcomePopup = ({
     })(document, "script", "facebook-jssdk");
   };
 
+  const handleMetaMaskConnect = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const message = "Sign this message to authenticate";
+        const signature = await signer.signMessage(message);
+        setWalletSignature(signature);
+
+        const response = await axios.post(
+          `${API}auth/check_walletAddress`,
+          {
+            signature: signature,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const responseData = response?.data;
+        if (responseData?.success === 1) {
+          setDefaultPopup(false);
+          setShowLoginPopup(true);
+        }
+        if (responseData?.success === 0) {
+          setDefaultPopup(false);
+          setShowCreateUserPopup(true);
+        }
+        setTimeout(() => {
+          reset();
+        }, 300);
+      } catch (error) {
+        console.error("MetaMask connection error:", error);
+      }
+    } else {
+      alert("MetaMask is not installed");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* welcome option */}
@@ -174,6 +218,15 @@ const WelcomePopup = ({
           <img src={facebook} alt="Log in with facebook" className="w-6 ml-5" />
           <p className="text-sm mx-auto font-medium text-[#222222]">
             Continue with Facebook
+          </p>
+        </div>
+        <div
+          className=" w-full flex flex-row items-center border border-[#222222] rounded-lg py-[10px] bg-[#ffffff] hover:bg-[#f7f7f7] transition-colors cursor-pointer"
+          onClick={handleMetaMaskConnect}
+        >
+          <img src={metamask} alt="Log in with metamask" className="w-6 ml-5" />
+          <p className="text-sm mx-auto font-medium text-[#222222]">
+            Continue with MetaMask
           </p>
         </div>
       </div>

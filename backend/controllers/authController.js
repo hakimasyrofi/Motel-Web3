@@ -4,24 +4,28 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const House = require("../models/house.model");
+const { ethers } = require("ethers");
 
 const saltRounds = 10;
 const daysToSeconds = 1 * 60 * 60; //   days * hours *  minutes *  seconds
 const expirationTimeInSeconds = Math.floor(Date.now() / 1000) + daysToSeconds;
 
 exports.signUp = async (req, res, next) => {
+  const message = "Sign this message to authenticate";
+
   try {
     const payload = req.body;
     if (!payload.name) {
       throw new Error("Please provide user name");
     }
-    if (!payload.emailId) {
-      throw new Error("Please provide email id");
+    if (!payload.emailId && !payload.signature) {
+      throw new Error("Please provide email id or signature");
     }
     if (!payload.birthDate) {
       throw new Error("Please provide date of birth");
     }
 
+    const signerAddress = ethers.verifyMessage(message, payload.signature);
     const passwordHash = await bcrypt.hash(payload.password, saltRounds);
 
     const userObj = {
@@ -30,6 +34,7 @@ exports.signUp = async (req, res, next) => {
         lastName: payload.name.lastName,
       },
       emailId: payload.emailId,
+      walletAddress: signerAddress,
       birthDate: payload.birthDate,
       password: passwordHash,
     };
@@ -245,6 +250,38 @@ exports.checkEmail = async (req, res) => {
     } else {
       response = {
         info: "User email doesn't exist.",
+        success: 0,
+        status: 200,
+      };
+    }
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Failed to search");
+  }
+};
+
+exports.checkWalletAddress = async (req, res) => {
+  const message = "Sign this message to authenticate";
+  try {
+    const payload = req.body;
+    console.log(payload);
+    const signerAddress = ethers.verifyMessage(message, payload.signature);
+    const findCriteria = {
+      walletAddress: signerAddress,
+    };
+    const isWalletExist = await User.find(findCriteria);
+    console.log(isWalletExist);
+    let response;
+    if (isWalletExist.length !== 0) {
+      response = {
+        info: "User wallet exist.",
+        success: 1,
+        status: 200,
+      };
+    } else {
+      response = {
+        info: "User wallet doesn't exist.",
         success: 0,
         status: 200,
       };

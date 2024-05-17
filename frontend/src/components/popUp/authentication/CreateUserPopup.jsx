@@ -12,6 +12,7 @@ import { userSignUp } from "../../../redux/actions/userActions";
 
 const CreateUserPopup = ({
   loginEmail,
+  walletSignature,
   setProfilePopup,
   showCreatePopUp,
   setPopup,
@@ -48,6 +49,7 @@ const CreateUserPopup = ({
         lastName: data.lastName,
       },
       emailId: data.email,
+      signature: walletSignature,
       birthDate: data.birthDate,
       password: data.password,
     };

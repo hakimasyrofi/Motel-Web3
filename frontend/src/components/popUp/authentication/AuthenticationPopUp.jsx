@@ -15,6 +15,7 @@ const AuthenticationPopUp = ({ popup, setPopup }) => {
   const [profilePopup, setProfilePopup] = useState(false);
   const [defaultPopup, setDefaultPopup] = useState(true);
   const [loginEmail, setLoginEmail] = useState(null);
+  const [walletSignature, setWalletSignature] = useState(null);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const popUpRef = useRef(null);
 
@@ -99,12 +100,14 @@ const AuthenticationPopUp = ({ popup, setPopup }) => {
                   setShowLoginPopup={setShowLoginPopup}
                   setShowCreateUserPopup={setShowCreateUserPopup}
                   setLoginEmail={setLoginEmail}
+                  setWalletSignature={setWalletSignature}
                 />
               )}
               {!showLoginPopup ? null : (
                 <LogInPopup
                   onBack={handleCloseLoginPopup}
                   loginEmail={loginEmail}
+                  walletSignature={walletSignature}
                   setDefaultPopup={setDefaultPopup}
                   setShowLoginPopup={setShowLoginPopup}
                   setPopup={setPopup}
@@ -116,6 +119,7 @@ const AuthenticationPopUp = ({ popup, setPopup }) => {
                 <CreateUserPopup
                   onBack={handleCloseLoginPopup}
                   loginEmail={loginEmail}
+                  walletSignature={walletSignature}
                   setProfilePopup={setProfilePopup}
                   showCreatePopUp={setShowCreateUserPopup}
                   setPopup={setPopup}
