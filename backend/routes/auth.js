@@ -13,6 +13,7 @@ const {
   userToHost,
   addWishlist,
   checkWalletAddress,
+  logInMetamask,
 } = require("../controllers/authController");
 const { verifyJwtToken } = require("../middleware/jwt");
 const router = express.Router();
@@ -21,6 +22,7 @@ router.use(express.json());
 
 router.post("/sign_up", signUp);
 router.post("/log_in", logIn);
+router.post("/log_in_metamask", logInMetamask);
 router.post("/logout", verifyJwtToken, logOut);
 router.post("/get_user_details", verifyJwtToken, getUserDetails);
 router.post("/post", verifyJwtToken, postUser);

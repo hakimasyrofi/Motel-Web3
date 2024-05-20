@@ -9,6 +9,8 @@ import { API } from "../../../backend";
 import { PulseLoader } from "react-spinners";
 import facebook from "../../../assets/basicIcon/facebook.svg";
 import metamask from "../../../assets/basicIcon/metamask.svg";
+import { useDispatch } from "react-redux";
+import { userLogIn } from "../../../redux/actions/userActions";
 
 const WelcomePopup = ({
   setDefaultPopup,
@@ -21,6 +23,7 @@ const WelcomePopup = ({
   const { handleSubmit, register, reset } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const dispatch = useDispatch();
 
   const handleInputFocus = () => {
     setInputFocused(true);
@@ -135,7 +138,43 @@ const WelcomePopup = ({
         const responseData = response?.data;
         if (responseData?.success === 1) {
           setDefaultPopup(false);
-          setShowLoginPopup(true);
+          const response = await axios.post(`${API}auth/log_in_metamask`, {
+            signature: signature,
+          });
+          const userData = response.data;
+          if (userData?.success === 0) {
+            alert("Error");
+          } else if (userData?.success === 1) {
+            dispatch(userLogIn(userData));
+            let accessToken = localStorage.getItem("accessToken");
+            let refreshToken = localStorage.getItem("refreshToken");
+
+            if (!accessToken) {
+              localStorage.setItem(
+                "accessToken",
+                JSON.stringify(userData?.accessToken)
+              );
+            } else if (accessToken) {
+              accessToken = userData?.accessToken;
+              localStorage.setItem("accessToken", JSON.stringify(accessToken));
+            }
+            if (!refreshToken) {
+              localStorage.setItem(
+                "refreshToken",
+                JSON.stringify(userData?.refreshToken)
+              );
+            } else if (refreshToken) {
+              refreshToken = userData?.refreshToken;
+              // // console.log(refreshToken);
+              localStorage.setItem(
+                "refreshToken",
+                JSON.stringify(refreshToken)
+              );
+            }
+            window.location.reload();
+            setShowLoginPopup(false);
+            setDefaultPopup(true);
+          }
         }
         if (responseData?.success === 0) {
           setDefaultPopup(false);

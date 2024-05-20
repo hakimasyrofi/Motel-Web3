@@ -9,10 +9,9 @@ const { ethers } = require("ethers");
 const saltRounds = 10;
 const daysToSeconds = 1 * 60 * 60; //   days * hours *  minutes *  seconds
 const expirationTimeInSeconds = Math.floor(Date.now() / 1000) + daysToSeconds;
+const message = "Sign this message to authenticate";
 
 exports.signUp = async (req, res, next) => {
-  const message = "Sign this message to authenticate";
-
   try {
     const payload = req.body;
     if (!payload.name) {
@@ -97,6 +96,60 @@ exports.logIn = async (req, res) => {
   try {
     let isMatched = await bcrypt.compare(password, userDetails[0].password);
     if (isMatched) {
+      const accessToken = jwt.sign(
+        {
+          _id: userDetails[0]._id,
+          role: userDetails[0].role,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: expirationTimeInSeconds }
+      );
+      const refreshToken = jwt.sign(
+        { _id: userDetails[0]._id, role: userDetails[0].role },
+        process.env.REFRESH_TOKEN_SECRET
+      );
+
+      const updatedUser = await User.findOneAndUpdate(
+        findCriteria,
+        { accessToken: accessToken, refreshToken: refreshToken },
+        { new: true }
+      );
+      let response = {
+        info: "Successfully logged in",
+        success: 1,
+        status: 200,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        user_details: updatedUser,
+      };
+      res.send(response);
+    } else if (!isMatched) {
+      let response = {
+        info: "Incorrect Password",
+        success: 0,
+      };
+      res.send(response);
+    } else {
+      res.send("Not allowed!");
+    }
+  } catch (error) {
+    res.status(500).send();
+  }
+};
+
+exports.logInMetamask = async (req, res) => {
+  const payload = req.body;
+  const signature = payload.signature;
+
+  const signerAddress = ethers.verifyMessage(message, signature);
+
+  const findCriteria = {
+    walletAddress: signerAddress,
+  };
+  const userDetails = await User.find(findCriteria).limit(1).exec();
+
+  try {
+    if (userDetails) {
       const accessToken = jwt.sign(
         {
           _id: userDetails[0]._id,
@@ -262,7 +315,6 @@ exports.checkEmail = async (req, res) => {
 };
 
 exports.checkWalletAddress = async (req, res) => {
-  const message = "Sign this message to authenticate";
   try {
     const payload = req.body;
     console.log(payload);
