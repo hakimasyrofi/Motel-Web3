@@ -13,9 +13,9 @@ async function getAccount() {
 
 // USDT
 async function deployUSDT() {
-  const contract = await ethers.getContractFactory("USDT");
-  const deploy = await contract.deploy();
-  return deploy;
+  const USDT = await ethers.getContractFactory("USDT");
+  const usdt = await USDT.deploy();
+  return usdt;
 }
 
 // Rental Payment
