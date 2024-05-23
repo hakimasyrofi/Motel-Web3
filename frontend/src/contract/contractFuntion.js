@@ -7,9 +7,10 @@ const rentalPaymentAddress = import.meta.env
 const tokenAddress = import.meta.env.VITE_TOKEN_CONTRACT_ADDRESS;
 
 const provider = new ethers.BrowserProvider(window.ethereum);
-const signer = await provider.getSigner();
 
 export const getRentalPaymentContract = async () => {
+  const signer = await provider.getSigner();
+
   const RentalPaymentContract = new ethers.Contract(
     rentalPaymentAddress,
     rentalPaymentArtifacts.abi,
@@ -19,6 +20,8 @@ export const getRentalPaymentContract = async () => {
 };
 
 export const getTokenContract = async () => {
+  const signer = await provider.getSigner();
+
   const TokenContract = new ethers.Contract(
     tokenAddress,
     usdtArtifacts.abi,
