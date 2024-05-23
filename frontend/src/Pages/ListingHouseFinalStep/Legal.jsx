@@ -7,6 +7,7 @@ import { createNewHouse } from "../../redux/actions/houseActions";
 const Legal = () => {
   const newHouseData = useSelector((state) => state.house.newHouse);
   const [labelValue, setLabelValue] = useState([]);
+  const [ownerWalletAddress, setOwnerWalletAddress] = useState("");
   const dispatch = useDispatch();
 
   const handleCheckboxChange = (event) => {
@@ -21,6 +22,11 @@ const Legal = () => {
       setLabelValue(labelValue.filter((item) => item !== labelText));
     }
   };
+
+  const handleWalletAddressChange = (e) => {
+    setOwnerWalletAddress(e.target.value);
+  };
+
   useEffect(() => {
     dispatch(
       createNewHouse(
@@ -37,10 +43,12 @@ const Legal = () => {
         newHouseData?.priceBeforeTaxes,
         newHouseData?.authorEarnedPrice,
         newHouseData?.basePrice,
-        labelValue
+        labelValue,
+        ownerWalletAddress
       )
     );
-  }, [labelValue]);
+  }, [labelValue, ownerWalletAddress]);
+
   return (
     <>
       <div className=" flex flex-col max-w-screen-sm mx-auto my-6 min-h-[70vh]">
@@ -95,7 +103,21 @@ const Legal = () => {
             />
           </div>
         </div>
-
+        <hr className="h-[1px] bg-[#dddddd] my-12" />
+        <p className="text-base mb-4 sm:text-lg text-[#222222] font-medium">
+          Input your wallet address to receive payment in cryptocurrency
+        </p>
+        <div>
+          <label htmlFor="walletAddress">Wallet Address:</label>
+          <input
+            className=" w-full p-3 border-[#b0b0b0] border-[1.3px] rounded-md mt-2"
+            placeholder="Your wallet address"
+            type="text"
+            id="ownerWalletAddress"
+            value={ownerWalletAddress}
+            onChange={handleWalletAddressChange}
+          ></input>
+        </div>
         <hr className="h-[1px] bg-[#dddddd] my-12" />
 
         <div className=" opacity-60 text-[#222222]">

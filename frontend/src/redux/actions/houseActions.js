@@ -51,7 +51,8 @@ export const createNewHouse =
     priceBeforeTaxes,
     authorEarnedPrice,
     basePrice,
-    security
+    security,
+    ownerWalletAddress
   ) =>
   async (dispatch) => {
     let newHouseData = {
@@ -69,6 +70,7 @@ export const createNewHouse =
       authorEarnedPrice: authorEarnedPrice,
       basePrice: basePrice,
       security: security,
+      ownerWalletAddress: ownerWalletAddress,
     };
 
     dispatch({
@@ -269,6 +271,27 @@ export const saveSecurity = (securityData) => async (dispatch) => {
     const res = await api.post("/house/save_security", securityData, {
       headers: { "Content-Type": "application/json" },
     });
+    if (res.status === 200) {
+      dispatch({
+        type: "CURRENT_NEW_HOUSE",
+        payload: res.data?.houseDetails,
+      });
+    }
+    // console.log(res);
+  } catch (error) {
+    // console.log(error);
+  }
+};
+
+export const saveOwnerWalletAddress = (walletAddress) => async (dispatch) => {
+  try {
+    const res = await api.post(
+      "/house/save_owner_wallet_address",
+      walletAddress,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
     if (res.status === 200) {
       dispatch({
         type: "CURRENT_NEW_HOUSE",

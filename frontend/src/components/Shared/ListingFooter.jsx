@@ -12,6 +12,7 @@ import {
   saveGuestType,
   saveHighlight,
   saveLocation,
+  saveOwnerWalletAddress,
   savePhotos,
   savePrices,
   savePrivacyType,
@@ -155,8 +156,14 @@ const ListingFooter = () => {
           security: createHouseData?.newHouse?.security,
           houseId: currentListingHouseId,
         };
+
+        const walletAddressData = {
+          ownerWalletAddress: createHouseData?.newHouse?.ownerWalletAddress,
+          houseId: currentListingHouseId,
+        };
         // data save title to db
         await dispatch(saveSecurity(securityData));
+        await dispatch(saveOwnerWalletAddress(walletAddressData));
       } else if (currentStepIndex === 16) {
         const publishList = {
           houseId: currentListingHouseId,
