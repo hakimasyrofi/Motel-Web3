@@ -10,6 +10,8 @@ import { PulseLoader } from "react-spinners";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { ethers } from "ethers";
+import { createBooking } from "../../contract/contractFuntion";
 
 const Payment = ({ searchParamsObj }) => {
   const user = useSelector((state) => state.user.userDetails);
@@ -23,7 +25,9 @@ const Payment = ({ searchParamsObj }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [message, setMessage] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("creditCard");
   //   geting the checkin and checkout dates
   const dateObj = {
     checkin: searchParamsObj?.checkin,
@@ -45,7 +49,19 @@ const Payment = ({ searchParamsObj }) => {
   const nightStaying = newReservationData
     ? newReservationData?.nightStaying
     : searchParamsObj?.nightStaying;
+
+  const totalPrice =
+    parseInt(nightStaying) !== 0
+      ? parseInt(nightStaying) * listingData?.basePrice
+      : listingData?.basePrice;
+
   const orderId = Math.round(Math.random() * 10000000000);
+
+  function dateTimeStringToUnixTimestampInSeconds(dateTimeString) {
+    const timestampInMilliseconds = Date.parse(dateTimeString);
+    const timestampInSeconds = Math.floor(timestampInMilliseconds / 1000);
+    return timestampInSeconds;
+  }
 
   // reservation form handler
   const handleSubmit = async (e) => {
@@ -64,16 +80,36 @@ const Payment = ({ searchParamsObj }) => {
 
       setIsProcessing(true);
 
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/payment-confirmed?guestNumber=${guestNumber}&checkIn=${checkin}&checkOut=${checkout}&listingId=${listingData?._id}&authorId=${listingData?.author}&nightStaying=${nightStaying}&orderId=${orderId}`,
-        },
-      });
+      if (paymentMethod == "creditCard") {
+        const { error } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/payment-confirmed?guestNumber=${guestNumber}&checkIn=${checkin}&checkOut=${checkout}&listingId=${listingData?._id}&authorId=${listingData?.author}&nightStaying=${nightStaying}&orderId=${orderId}`,
+          },
+        });
 
-      if (error) {
-        setMessage(error.message);
-        toast.error("Payment failed. Try again!");
+        if (error) {
+          setMessage(error.message);
+          toast.error("Payment failed. Try again!");
+        }
+      } else if (paymentMethod == "crypto") {
+        try {
+          if (!listingData.ownerWalletAddress) {
+            throw new Error("This house does not accept crypto payments");
+          }
+          await createBooking(
+            listingData.ownerWalletAddress,
+            ethers.parseUnits(totalPrice.toString(), "ether"),
+            dateTimeStringToUnixTimestampInSeconds(newReservationData.checkOut)
+          );
+          navigate(
+            `/payment-confirmed?guestNumber=${guestNumber}&checkIn=${checkin}&checkOut=${checkout}&listingId=${listingData?._id}&authorId=${listingData?.author}&nightStaying=${nightStaying}&orderId=${orderId}`
+          );
+        } catch (error) {
+          setMessage(error);
+          console.log(error);
+          toast.error(error.message || "Crypto payment failed. Try again!");
+        }
       }
 
       setIsProcessing(false);
@@ -103,11 +139,44 @@ const Payment = ({ searchParamsObj }) => {
         <hr className="w-full h-[1.3px] bg-[#dddddd] my-4" />
         {/* payment element */}
         <form onSubmit={handleSubmit}>
-          <h5 className="text-xl md:text-[22px] text-[#222222] font-medium pb-4">
+          <h5 className="text-xl md:text-[22px] text-[#222222] font-medium">
             Pay with
           </h5>
-          <PaymentElement />
-          <hr className="w-full h-[1.3px] bg-[#dddddd] my-10" />
+          <div className="rounded-lg rounded-tr-lg border border-[#b9b9b9] w-full my-6 relative flex flex-col">
+            <div>
+              <div className="grid grid-cols-2 cursor-pointer">
+                <div
+                  onClick={() => setPaymentMethod("creditCard")}
+                  className={`px-3 py-5 ${
+                    paymentMethod === "creditCard"
+                      ? "text-white bg-gray-600 rounded-l-lg"
+                      : ""
+                  }`}
+                >
+                  Credit Card
+                </div>
+                <div
+                  onClick={() => setPaymentMethod("crypto")}
+                  className={`px-3 py-5 border-l border-[#b9b9b9] ${
+                    paymentMethod === "crypto"
+                      ? "text-white bg-gray-600 rounded-r-lg"
+                      : ""
+                  }`}
+                >
+                  Crypto (USDT)
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              display: paymentMethod === "creditCard" ? "block" : "none",
+            }}
+          >
+            <PaymentElement />
+            <hr className="w-full h-[1.3px] bg-[#dddddd] my-10" />
+          </div>
+
           <div>
             <h5 className="text-xl md:text-[22px] text-[#222222] font-medium">
               Ground rules
