@@ -54,10 +54,8 @@ exports.newReservation = async (req, res) => {
 
     const listingDetails = await House.findById(findCriteria);
 
-    const basePrice = parseInt(listingDetails.basePrice);
-    const tax = Math.round((parseInt(basePrice) * 14) / 100);
-    const authorEarnedPrice =
-      basePrice - Math.round((parseInt(basePrice) * 3) / 100);
+    const totalPrice = parseInt(listingDetails.basePrice) * nightStaying;
+    const authorEarnedPrice = totalPrice - (parseInt(totalPrice) * 5) / 100;
 
     let newReservation = {
       listingId: listingId,
@@ -67,7 +65,6 @@ exports.newReservation = async (req, res) => {
       checkOut: checkOut,
       nightStaying: parseInt(nightStaying),
       basePrice: basePrice,
-      taxes: tax,
       authorEarnedPrice: authorEarnedPrice,
       orderId: orderId,
     };
