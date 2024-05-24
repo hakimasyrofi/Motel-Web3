@@ -1,3 +1,7 @@
+# Motel Web3
+
+This repository is a derivative of two original repositories: [motelFrontend](https://github.com/Mehedi-Hasan0/motelFrontend) and [motelBackend](https://github.com/Mehedi-Hasan0/motelBackend). It has been enhanced with a cryptocurrency payment function, allowing the website to accept payments using cryptocurrency. This enhancement has already been implemented, enabling users to make transactions seamlessly with cryptocurrency on the platform.
+
 # Setup Instructions
 
 ## A. MetaMask Configuration
@@ -26,7 +30,15 @@ To use the Polygon Amoy test network, follow these steps:
    - **Block Explorer URL**: [https://amoy.polygonscan.com/](https://amoy.polygonscan.com/)
 6. Click **"Save"** to add the Amoy Testnet network.
 
-### 3. Importing Payment Token
+### 3. Obtain Native Test Tokens
+
+To obtain the native test tokens required for transactions on the test network, please follow these steps:
+
+1. Visit the [Polygon Faucet](https://faucet.polygon.technology/).
+2. Select the Polygon PoS (Amoy) network and input your wallet address.
+3. Upon successful request, a pop-up notification will confirm the transfer of native test tokens.
+
+### 4. Importing Payment Token
 
 We will use USDT test tokens for transactions in the motel application. To import the token into MetaMask:
 
@@ -35,7 +47,7 @@ We will use USDT test tokens for transactions in the motel application. To impor
    - **Token Address**: [0xbDB00B61B1b1B79101C22916Efefe661dD6e48eC](https://amoy.polygonscan.com/address/0xbDB00B61B1b1B79101C22916Efefe661dD6e48eC)
 3. Click **"Next"** and then **"Import"**.
 
-### 4. Get Test Tokens
+### 5. Get Test Tokens
 
 To mint USDT test tokens, follow these steps:
 
