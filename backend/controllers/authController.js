@@ -17,14 +17,13 @@ exports.signUp = async (req, res, next) => {
     if (!payload.name) {
       throw new Error("Please provide user name");
     }
-    if (!payload.emailId && !payload.signature) {
-      throw new Error("Please provide email id or signature");
+    if (!payload.emailId) {
+      throw new Error("Please provide email id");
     }
     if (!payload.birthDate) {
       throw new Error("Please provide date of birth");
     }
 
-    const signerAddress = ethers.verifyMessage(message, payload.signature);
     const passwordHash = await bcrypt.hash(payload.password, saltRounds);
 
     const userObj = {
@@ -33,7 +32,9 @@ exports.signUp = async (req, res, next) => {
         lastName: payload.name.lastName,
       },
       emailId: payload.emailId,
-      walletAddress: signerAddress,
+      walletAddress: payload.signature
+        ? ethers.verifyMessage(message, payload.signature)
+        : "",
       birthDate: payload.birthDate,
       password: passwordHash,
     };
