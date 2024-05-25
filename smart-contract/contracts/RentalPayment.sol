@@ -21,7 +21,7 @@ contract RentalPayment is AccessControl {
     }
 
     mapping(uint256 => Booking) public bookings;
-    uint256 public bookingCounter;
+    mapping(address => uint256[]) private ownerBookings;
 
     constructor(address _mobifiWallet, address _paymentToken) {
         mobifiWallet = _mobifiWallet;
@@ -34,15 +34,15 @@ contract RentalPayment is AccessControl {
         _;
     }
 
-    modifier onlyManager() {
-        require(hasRole(MANAGER_ROLE, msg.sender), "Caller is not a manager");
+    modifier onlyManagerOrAdmin() {
+        require(hasRole(MANAGER_ROLE, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not a manager or admin");
         _;
     }
 
-    function createBooking(address payable _owner, uint256 _amount, uint256 _endTime) external {
+    function createBooking(uint256 bookingId, address payable _owner, uint256 _amount, uint256 _endTime) external {
         require(_amount > 0, "Payment must be greater than 0");
+        require(bookings[bookingId].renter == address(0), "Booking ID must be unique");
 
-        uint256 bookingId = bookingCounter++;
         uint256 commission = (_amount * commissionPercentage) / 100;
         uint256 amountAfterCommission = _amount - commission;
 
@@ -54,6 +54,8 @@ contract RentalPayment is AccessControl {
             disputed: false,
             paid: false
         });
+
+        ownerBookings[_owner].push(bookingId);
 
         require(paymentToken.transferFrom(msg.sender, address(this), _amount), "Transfer failed");
         require(paymentToken.transfer(mobifiWallet, commission), "Commission transfer failed");
@@ -68,7 +70,7 @@ contract RentalPayment is AccessControl {
         booking.disputed = true;
     }
 
-    function resolveDispute(uint256 _bookingId, bool favorRenter) external onlyManager {
+    function resolveDispute(uint256 _bookingId, bool favorRenter) external onlyManagerOrAdmin {
         Booking storage booking = bookings[_bookingId];
         require(booking.disputed, "No dispute raised");
 
@@ -80,16 +82,36 @@ contract RentalPayment is AccessControl {
         booking.disputed = false;
     }
 
-    function releasePayment(uint256 _bookingId) external {
-        Booking storage booking = bookings[_bookingId];
-        require(booking.owner == msg.sender, "Caller is not an owner");
-        require(block.timestamp > booking.endTime + 7 days, "Dispute period not ended");
-        require(!booking.disputed, "Dispute raised");
-        require(!booking.paid, "Payment already released");
+    function releasePayment() external {
+        uint256 totalAmount = 0;
+        uint256[] storage ownerBookingIds = ownerBookings[msg.sender];
+        uint256[] memory newOwnerBookingIds = new uint256[](ownerBookingIds.length);
+        uint256 newIndex = 0;
 
-        booking.paid = true;
-        require(paymentToken.transfer(booking.owner, booking.amount), "Transfer failed");
+        for (uint256 i = 0; i < ownerBookingIds.length; i++) {
+            uint256 bookingId = ownerBookingIds[i];
+            Booking storage booking = bookings[bookingId];
+            if (
+                block.timestamp > booking.endTime + 7 days &&
+                !booking.disputed &&
+                !booking.paid
+            ) {
+                totalAmount += booking.amount;
+                booking.paid = true;
+            } else {
+                // If the booking is not processed, keep its ID
+                newOwnerBookingIds[newIndex] = bookingId;
+                newIndex++;
+            }
+        }
+
+        // Update ownerBookings with the new array excluding processed booking IDs
+        ownerBookings[msg.sender] = newOwnerBookingIds;
+
+        require(totalAmount > 0, "No payment available to release");
+        require(paymentToken.transfer(msg.sender, totalAmount), "Transfer failed");
     }
+
 
     function addManager(address manager) external onlyAdmin {
         grantRole(MANAGER_ROLE, manager);

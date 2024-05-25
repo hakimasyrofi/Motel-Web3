@@ -1,6 +1,6 @@
 // npx hardhat test ./test/TestRentalPayment.js
 const { expect } = require("chai");
-const { network } = require("hardhat");
+const { ethers } = require("hardhat");
 const { getAccount, getRentalPayment } = require("./TestDeploy");
 const { keccak256 } = require("../utils/util");
 
@@ -34,13 +34,12 @@ describe("RentalPayment", function () {
       await paymentToken.connect(renter).approve(rentalPayment.target, amount);
 
       await expect(() =>
-        rentalPayment
-          .connect(renter)
-          .createBooking(
-            owner.address,
-            amount,
-            Math.floor(Date.now() / 1000) + 3600
-          )
+        rentalPayment.connect(renter).createBooking(
+          0, // Booking ID
+          owner.address,
+          amount,
+          Math.floor(Date.now() / 1000) + 3600
+        )
       ).to.changeTokenBalances(
         paymentToken,
         [renter, rentalPayment, mobifiRecipientWallet],
@@ -78,12 +77,12 @@ describe("RentalPayment", function () {
 
   describe("releasePayment", function () {
     it("+ should release payment to the owner after the dispute period has ended", async function () {
-      await network.provider.send("evm_increaseTime", [8 * 24 * 60 * 60]); // 8 days
-      await network.provider.send("evm_mine", []); // Mine a new block to apply the time change
+      await ethers.provider.send("evm_increaseTime", [8 * 24 * 60 * 60]); // 8 days
+      await ethers.provider.send("evm_mine", []); // Mine a new block to apply the time change
 
       const booking = await rentalPayment.bookings(0);
       await expect(() =>
-        rentalPayment.connect(owner).releasePayment(0)
+        rentalPayment.connect(owner).releasePayment()
       ).to.changeTokenBalance(paymentToken, owner, booking.amount);
 
       const updatedBooking = await rentalPayment.bookings(0);
@@ -103,8 +102,8 @@ describe("RentalPayment", function () {
   describe("changeMobifiWallet", function () {
     it("+ should change mobifiWallet", async function () {
       const [newWallet] = await ethers.getSigners();
-      await rentalPayment.connect(admin).changeMobifiWallet(newWallet);
-      expect(await rentalPayment.mobifiWallet()).to.equal(newWallet);
+      await rentalPayment.connect(admin).changeMobifiWallet(newWallet.address);
+      expect(await rentalPayment.mobifiWallet()).to.equal(newWallet.address);
     });
   });
 
