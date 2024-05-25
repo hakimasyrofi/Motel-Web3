@@ -30,7 +30,7 @@ export const getTokenContract = async () => {
   return TokenContract;
 };
 
-export const createBooking = async (owner, amount, endTime) => {
+export const createBooking = async (bookingId, owner, amount, endTime) => {
   const rentalPaymentContract = await getRentalPaymentContract();
   const tokenContract = await getTokenContract();
 
@@ -38,6 +38,7 @@ export const createBooking = async (owner, amount, endTime) => {
   await approve.wait();
 
   const createBooking = await rentalPaymentContract.createBooking(
+    bookingId,
     owner,
     amount,
     endTime

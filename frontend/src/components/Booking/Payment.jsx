@@ -98,6 +98,7 @@ const Payment = ({ searchParamsObj }) => {
             throw new Error("This house does not accept crypto payments");
           }
           await createBooking(
+            orderId,
             listingData.ownerWalletAddress,
             ethers.parseUnits(totalPrice.toString(), "ether"),
             dateTimeStringToUnixTimestampInSeconds(newReservationData.checkOut)
