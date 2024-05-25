@@ -11,10 +11,11 @@ You can check the documentation diagram for this project from the following link
 ### 1. Setup MetaMask
 
 1. **Install MetaMask**: If you haven't already, download and install the MetaMask extension for your browser.
-2. **Create Accounts**: Create three accounts in MetaMask:
-   - **Renter**
-   - **House Owner**
-   - **Mobifi Commission Receiver**
+2. **Create Accounts**: Set up the following accounts in MetaMask:
+   - **Admin:** This account will have deployment and administrative access to the smart contract.
+   - **Renter:** This account will be used by the renter.
+   - **House Owner:** House Owner: This account will be used by the house owner.
+   - **Mobifi Commission Receiver:** This account will receive a 5% commission from transactions. It can be set to the same account as the Admin.
 
 ### 2. Adding Test Network to MetaMask
 
@@ -26,7 +27,7 @@ To use the Polygon Amoy test network, follow these steps:
 4. Click on **"Add Network"** at the bottom.
 5. Enter the following details:
    - **Network Name**: Amoy Testnet
-   - **New RPC URL**: [https://still-broken-hill.matic-amoy.quiknode.pro/8709bf5eb7f5a10aa1d549e0b3e378d5b9372a96/](https://still-broken-hill.matic-amoy.quiknode.pro/8709bf5eb7f5a10aa1d549e0b3e378d5b9372a96/)
+   - **New RPC URL**: [https://rpc-amoy.polygon.technology/](https://rpc-amoy.polygon.technology/)
    - **Chain ID**: 80002
    - **Currency Symbol**: (Leave it blank or enter 'MATIC' if required)
    - **Block Explorer URL**: [https://amoy.polygonscan.com/](https://amoy.polygonscan.com/)
