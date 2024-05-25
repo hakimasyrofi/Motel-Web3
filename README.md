@@ -2,6 +2,8 @@
 
 This repository is a derivative of two original repositories: [motelFrontend](https://github.com/Mehedi-Hasan0/motelFrontend) and [motelBackend](https://github.com/Mehedi-Hasan0/motelBackend). It has been enhanced with a cryptocurrency payment function, allowing the website to accept payments using cryptocurrency. This enhancement has already been implemented, enabling users to make transactions seamlessly with cryptocurrency on the platform.
 
+You can check the documentation diagram for this project from the following link: [Documentation Diagram](https://github.com/hakimasyrofi/Motel-Web3/blob/main/Motel%20Web3%20Diagram%20Documentation.pdf).
+
 # Setup Instructions
 
 ## A. MetaMask Configuration
