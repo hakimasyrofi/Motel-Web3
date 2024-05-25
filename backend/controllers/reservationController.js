@@ -64,7 +64,7 @@ exports.newReservation = async (req, res) => {
       checkIn: checkIn,
       checkOut: checkOut,
       nightStaying: parseInt(nightStaying),
-      basePrice: basePrice,
+      basePrice: totalPrice,
       authorEarnedPrice: authorEarnedPrice,
       orderId: orderId,
     };
