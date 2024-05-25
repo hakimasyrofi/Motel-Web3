@@ -59,7 +59,7 @@ To mint USDT test tokens, follow these steps:
 3. Select the **"mint"** function.
 4. Fill in the required details:
    - **Address**: The address that will receive the tokens.
-   - **Amount**: The amount of tokens to mint (in 18 decimal format).
+   - **Amount**: The number of tokens to mint, specified in 18 decimal format. For example, to mint 10 USDT, you need to input `10000000000000000000`.
 5. Execute the transaction to mint tokens to the specified address.
 
 Following these steps will configure MetaMask for use with the Polygon Amoy test network and set up the necessary tokens for transactions.
